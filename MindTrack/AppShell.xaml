@@ -11,5 +11,7 @@
         Title="Home"
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
-
+    <ShellContent 
+        ContentTemplate="{DataTemplate local:Pages.ScorePage}"
+        Route="ScorePage" />
 </Shell>
