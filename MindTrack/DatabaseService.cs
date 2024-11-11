@@ -1,78 +1,141 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using MindTrack.Module;
 using MySql.Data.MySqlClient;
 
-public class DatabaseService
+namespace MindTrack.Module
 {
-    private readonly string _connectionString;
-
-    public DatabaseService()
+    public class DatabaseService
     {
-        _connectionString = "Server=192.168.153.146;Database=mindtrack;User ID=admin;Password=B9J6-vw#fk%qHkrAB9*j;Port=3306;";
-    }
+        private readonly string _connectionString;
 
-    public async Task<List<Person>> GetPersonDataByGameAsync(string game)
-    {
-        var personItems = new List<Person>();
-
-        using (var connection = new MySqlConnection(_connectionString))
+        public DatabaseService()
         {
-            await connection.OpenAsync();
+            _connectionString = "Server=localhost;Database=mindtrack;User ID=root;Password=jtol123;Port=3306;";
+        }
 
-            string query = @"
-                SELECT p.id, p.name, p.birthday, s.game_score 
-                FROM person p
-                LEFT JOIN score s ON p.id = s.person_id
-                LEFT JOIN game g ON s.game_id = g.id
-                WHERE g.name = @game";
+        public async Task<List<Person>> GetPersonDataByGameAsync(string game)
+        {
+            var personItems = new List<Person>();
 
-            using (var command = new MySqlCommand(query, connection))
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                command.Parameters.AddWithValue("@game", game);
+                await connection.OpenAsync();
 
-                using (var reader = await command.ExecuteReaderAsync())
+                string query = @"
+                    SELECT p.id, p.name, p.birthday, s.game_score, s.date_played
+                    FROM person p
+                    LEFT JOIN score s ON p.id = s.person_id
+                    LEFT JOIN game g ON s.game_id = g.id
+                    WHERE g.name = @game";
+
+                using (var command = new MySqlCommand(query, connection))
                 {
-                    while (await reader.ReadAsync())
+                    command.Parameters.AddWithValue("@game", game);
+
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        var item = new Person
+                        while (await reader.ReadAsync())
                         {
-                            ID = reader.GetInt32("id"),
-                            Name = reader.GetString("name"),
-                            Birthday = reader.GetDateTime("birthday"),
-                            Score = reader.IsDBNull("game_score") ? (int?)null : reader.GetInt32("game_score")
-                        };
-                        personItems.Add(item);
+                            var item = new Person
+                            {
+                                ID = reader.GetInt32("id"),
+                                Name = reader.GetString("name"),
+                                Birthday = reader.GetDateTime("birthday"),
+                                Score = reader.IsDBNull("game_score") ? (int?)null : reader.GetInt32("game_score"),
+                                DatePlayed = reader.IsDBNull("date_played") ? (DateTime?)null : reader.GetDateTime("date_played")
+                            };
+                            personItems.Add(item);
+                        }
                     }
                 }
             }
+
+            return personItems;
         }
 
-        return personItems;
-    }
-
-    public async Task<List<string>> GetGamesAsync()
-    {
-        var gameList = new List<string>();
-
-        using (var connection = new MySqlConnection(_connectionString))
+        public async Task<List<Person>> GetAllPersonsAsync()
         {
-            await connection.OpenAsync();
+            var personItems = new List<Person>();
 
-            string query = "SELECT name FROM game";
-            using (var command = new MySqlCommand(query, connection))
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                using (var reader = await command.ExecuteReaderAsync())
+                await connection.OpenAsync();
+
+                string query = "SELECT id, name, birthday FROM person";
+
+                using (var command = new MySqlCommand(query, connection))
                 {
-                    while (await reader.ReadAsync())
+                    using (var reader = await command.ExecuteReaderAsync())
                     {
-                        gameList.Add(reader.GetString("name"));
+                        while (await reader.ReadAsync())
+                        {
+                            var person = new Person
+                            {
+                                ID = reader.GetInt32("id"),
+                                Name = reader.GetString("name"),
+                                Birthday = reader.GetDateTime("birthday"),
+                            };
+
+                            personItems.Add(person);
+                        }
                     }
                 }
             }
+
+            return personItems;
         }
 
-        return gameList;
+        public async Task<bool> AddPersonService(string name, string email, DateTime birthday)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string query = "INSERT INTO person (name, email, birthday) VALUES (@name, @email, @birthday)";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@name", name);
+                        command.Parameters.AddWithValue("@email", email);
+                        command.Parameters.AddWithValue("@birthday", birthday);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error inserting person into database: {ex.Message}");
+                return false;
+            }
+        }
+
+        public async Task<List<string>> GetGamesAsync()
+        {
+            var gameList = new List<string>();
+
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                string query = "SELECT name FROM game";
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            gameList.Add(reader.GetString("name"));
+                        }
+                    }
+                }
+            }
+
+            return gameList;
+        }
     }
 }
