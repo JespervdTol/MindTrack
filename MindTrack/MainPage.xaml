@@ -1,15 +1,58 @@
 ﻿<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MindTrack.MainPage">
+             x:Class="MindTrack.MainPage"
+             BackgroundColor="#E1E1E1">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="30,0" Spacing="25">
-            <Button
-                x:Name="LoginBtn"
-                Text="Log in" 
-                SemanticProperties.Hint="Redirects to score page"
-                Clicked="onLoginClicked"
-                HorizontalOptions="Fill" />
+    <Grid VerticalOptions="Center" HorizontalOptions="Center" Padding="30">
+        <VerticalStackLayout Spacing="20" HorizontalOptions="Center">
+
+            <!-- Image placed outside the white frame -->
+            <Image Source="mindtrack_logo.png" 
+                   HeightRequest="100" 
+                   WidthRequest="200" 
+                   Aspect="AspectFit" 
+                   HorizontalOptions="Center" />
+
+            <!-- Frame containing the form -->
+            <Frame BackgroundColor="White" CornerRadius="20" Padding="20" WidthRequest="300">
+                <VerticalStackLayout Spacing="20">
+
+                    <Label Text="Login" 
+                           FontSize="24" 
+                           HorizontalOptions="Center" 
+                           TextColor="Black" />
+
+                    <!-- Username Entry -->
+                    <Frame BackgroundColor="#F5F5F5" CornerRadius="10" Padding="0">
+                        <Entry x:Name="UsernameEntry" 
+                               Placeholder="Username" 
+                               HeightRequest="40" 
+                               BackgroundColor="Transparent" />
+                    </Frame>
+
+                    <!-- Password Entry -->
+                    <Frame BackgroundColor="#F5F5F5" CornerRadius="10" Padding="0">
+                        <Entry x:Name="PasswordEntry" 
+                               Placeholder="Password" 
+                               IsPassword="True" 
+                               HeightRequest="40" 
+                               BackgroundColor="Transparent" />
+                    </Frame>
+
+                    <HorizontalStackLayout>
+                        <CheckBox x:Name="RememberMeCheckBox" />
+                        <Label Text="Remember me" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+
+                    <!-- Sign In Button with Clicked Event -->
+                    <Button Text="Sign in"  
+                            TextColor="White" 
+                            CornerRadius="20" 
+                            HeightRequest="40" 
+                            HorizontalOptions="Fill"
+                            Clicked="onLoginClicked" />
+                </VerticalStackLayout>
+            </Frame>
         </VerticalStackLayout>
-    </ScrollView>
+    </Grid>
 </ContentPage>

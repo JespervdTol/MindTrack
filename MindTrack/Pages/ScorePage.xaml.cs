@@ -11,6 +11,8 @@ namespace MindTrack.Pages
         public ObservableCollection<Person> PersonItems { get; set; }
         public ObservableCollection<string> GameList { get; set; }
 
+        private const string LastSelectedGameKey = "LastSelectedGame";
+
         private bool _isScoreboardVisible;
         public bool IsScoreboardVisible
         {
@@ -50,7 +52,6 @@ namespace MindTrack.Pages
         private async void LoadGames()
         {
             var games = await _databaseService.GetGamesAsync();
-
             GameList.Clear();
 
             foreach (var game in games)
@@ -58,17 +59,43 @@ namespace MindTrack.Pages
                 GameList.Add(game);
             }
 
-            if (GameList.Count > 0)
+            var lastSelectedGame = Preferences.Get(LastSelectedGameKey, string.Empty);
+
+            if (!string.IsNullOrEmpty(lastSelectedGame) && GameList.Contains(lastSelectedGame))
+            {
+                gamePicker.SelectedItem = lastSelectedGame;
+
+                await LoadDataByGame(lastSelectedGame);
+            }
+            else if (GameList.Count > 0)
             {
                 await LoadDataByGame(GameList[0]);
             }
         }
 
+        // Sorted for startevent
         private async Task LoadDataByGame(string game)
         {
             try
             {
                 var personData = await _databaseService.GetPersonDataByGameAsync(game);
+
+                if (game.Equals("Reaction Test", StringComparison.OrdinalIgnoreCase))
+                {
+                    personData = personData.OrderBy(p => p.Score).ToList();
+                    foreach (var person in personData)
+                    {
+                        person.ScoreFormatted = person.Score.HasValue ? $"{person.Score}ms" : "N/A";
+                    }
+                }
+                else if (game.Equals("Simon", StringComparison.OrdinalIgnoreCase))
+                {
+                    personData = personData.OrderByDescending(p => p.Score).ToList();
+                    foreach (var person in personData)
+                    {
+                        person.ScoreFormatted = person.Score.HasValue ? $"Level {person.Score}" : "N/A";
+                    }
+                }
 
                 MainThread.BeginInvokeOnMainThread(() =>
                 {
@@ -86,7 +113,7 @@ namespace MindTrack.Pages
             }
         }
 
-        private async void LoadPersonTableData()
+        private async Task LoadPersonTableData()
         {
             try
             {
@@ -112,17 +139,23 @@ namespace MindTrack.Pages
         {
             if (sender is Picker picker && picker.SelectedItem is string selectedGame && !string.IsNullOrEmpty(selectedGame))
             {
+                Preferences.Set(LastSelectedGameKey, selectedGame);
+
                 await LoadDataByGame(selectedGame);
             }
         }
 
-        private void ShowScoreboardTable(object sender, EventArgs e)
+        private async void ShowScoreboardTable(object sender, EventArgs e)
         {
             IsScoreboardVisible = true;
             IsPersonTableVisible = false;
 
-            LoadDataByGame(GameList[0]);
+            if (gamePicker.SelectedItem is string selectedGame && !string.IsNullOrEmpty(selectedGame))
+            {
+                await LoadDataByGame(selectedGame);
+            }
         }
+
 
         private void ShowPersonTable(object sender, EventArgs e)
         {
@@ -134,31 +167,53 @@ namespace MindTrack.Pages
 
         private async void OnAddPersonClicked(object sender, EventArgs e)
         {
-            string name = await DisplayPromptAsync("Add Person", "Enter name:");
+            string name = await DisplayPromptAsync("Gebruiker Toevoegen", "Vul naam in:");
             if (string.IsNullOrEmpty(name)) return;
 
-            string email = await DisplayPromptAsync("Add Person", "Enter email:");
-            if (string.IsNullOrEmpty(email)) return;
 
-            string birthdayStr = await DisplayPromptAsync("Add Person", "Enter birthday (dd/MM/yyyy):");
-            if (string.IsNullOrEmpty(birthdayStr)) return;
+            //string email = await DisplayPromptAsync("Add Person", "Enter email:");
+            //if (string.IsNullOrEmpty(email)) return;
 
-            DateTime birthday;
-            if (!DateTime.TryParseExact(birthdayStr, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out birthday))
-            {
-                await DisplayAlert("Error", "Invalid date format. Please use dd/MM/yyyy.", "OK");
-                return;
-            }
+            //string birthdayStr = await DisplayPromptAsync("Add Person", "Enter birthday (dd/MM/yyyy):");
+            //if (string.IsNullOrEmpty(birthdayStr)) return;
 
-            bool success = await _databaseService.AddPersonService(name, email, birthday);
+            //DateTime birthday;
+            //if (!DateTime.TryParseExact(birthdayStr, "dd/MM/yyyy", null, System.Globalization.DateTimeStyles.None, out birthday))
+            //{
+            //    await DisplayAlert("Error", "Invalid date format. Please use dd/MM/yyyy.", "OK");
+            //    return;
+            //}
+
+            //int accountId = 0;
+
+            //email, birthday temp removed: AddPersonService(name, email, birthday)
+            bool success = await _databaseService.AddPersonService(name);
+
             if (success)
             {
                 await DisplayAlert("Success", "Person added successfully", "OK");
+                //await LoadPersonTableData();
             }
             else
             {
                 await DisplayAlert("Error", "Failed to add person. Try again later.", "OK");
             }
+        }
+
+        private async void OnLogoutClicked(object sender, EventArgs e)
+        {
+            bool rememberMe = Preferences.Get("RememberMe", false);
+
+            if (!rememberMe)
+            {
+                Preferences.Remove("username");
+                Preferences.Remove("password");
+            }
+
+            Preferences.Remove("SomeSessionKey");
+
+
+            await Shell.Current.GoToAsync("//MainPage");
         }
     }
 }

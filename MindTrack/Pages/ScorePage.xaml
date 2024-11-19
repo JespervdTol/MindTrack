@@ -3,31 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="MindTrack.Pages.ScorePage"
              Title="">
-    <ScrollView>
+    <ScrollView Orientation="Both">
         <VerticalStackLayout Margin="20,0,20,20">
-            <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto" Margin="0,20,0,10">  
+
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Margin="0,20,0,10">
                 <Label Text="Scoreboard/Personen" 
+                       Style="{StaticResource Headline}"
                        FontSize="25" 
                        FontAttributes="Bold" 
-                       TextColor="Black" 
-                       VerticalOptions="Center"/>
+                       VerticalOptions="Center"
+                       HorizontalOptions="Start"
+                       Grid.Row="0" Grid.Column="0" />
 
-                <Picker Title="Selecteer spel" 
+                <Picker x:Name="gamePicker"
+                        Title="Selecteer spel" 
                         ItemsSource="{Binding GameList}" 
                         SelectedIndexChanged="OnGameSelected"
-                        TextColor="Black"
-                        HorizontalOptions="CenterAndExpand"
+                        WidthRequest="150"
+                        HorizontalOptions="Start"
                         VerticalOptions="Center"
-                        Margin="0,10,0,10"
-                        IsVisible="{Binding IsScoreboardVisible}"/>
+                        IsVisible="{Binding IsScoreboardVisible}"
+                        Grid.Row="1" Grid.Column="0"/>
 
-                <Button Text="Add Person" 
-                        WidthRequest="150" 
+                <Button Text="Gebruiker Toevoegen" 
+                        WidthRequest="180" 
                         HeightRequest="30"
                         Clicked="OnAddPersonClicked" 
-                        HorizontalOptions="Center"
+                        HorizontalOptions="Start"
                         IsVisible="{Binding IsPersonTableVisible}"
-                        Margin="0,10,0,10" />
+                        Margin="0,10,0,10"
+                        Grid.Row="1" Grid.Column="0" />
 
                 <Image Source="mindtrack_logo.png" 
                        WidthRequest="150" 
@@ -35,34 +40,40 @@
                        Aspect="AspectFit"
                        HorizontalOptions="End"
                        VerticalOptions="Center"
-                       Grid.Column="1" />
+                       Grid.Row="1" Grid.Column="1" />
             </Grid>
 
-            <HorizontalStackLayout Margin="0,10,0,10">
-                <Button Text="Scoreboard" Clicked="ShowScoreboardTable" IsEnabled="{Binding IsPersonTableVisible}" />
-                <Button Text="Personen" Clicked="ShowPersonTable" IsEnabled="{Binding IsScoreboardVisible}" />
+            <HorizontalStackLayout Margin="0,10,0,10" HorizontalOptions="Start">
+                <Button Text="Scoreboard" Clicked="ShowScoreboardTable" Margin="0,10,0,10" IsEnabled="{Binding IsPersonTableVisible}" />
+                <Button Text="Personen" Clicked="ShowPersonTable" Margin="5,10,0,10" IsEnabled="{Binding IsScoreboardVisible}" />
+                <Button Text="Log uit"
+                        Clicked="OnLogoutClicked"
+                        HorizontalOptions="End"
+                        VerticalOptions="End"
+                        WidthRequest="100"
+                        HeightRequest="40"
+                        BackgroundColor="Red"
+                        TextColor="White"
+                        Margin="5,10,0,10" />
             </HorizontalStackLayout>
 
             <Frame BackgroundColor="#F2F2F2" CornerRadius="10" Padding="10" Margin="0,10,0,0" IsVisible="{Binding IsScoreboardVisible}">
                 <Grid RowDefinitions="Auto,*">
-
                     <Grid ColumnDefinitions="*,*,*,*,*" Padding="5">
-                        <Label Text="ID" FontAttributes="Bold" FontSize="14"/>
-                        <Label Text="Naam" FontAttributes="Bold" FontSize="14" Grid.Column="1"/>
-                        <Label Text="Score" FontAttributes="Bold" FontSize="14" Grid.Column="2"/>
-                        <Label Text="Geboortedatum" FontAttributes="Bold" FontSize="14" Grid.Column="3"/>
-                        <Label Text="Gespeelde Datum" FontAttributes="Bold" FontSize="14" Grid.Column="4"/>
+                        <Label Text="Naam" FontAttributes="Bold" FontSize="14" />
+                        <Label Text="Score" FontAttributes="Bold" FontSize="14" Grid.Column="1"/>
+                        <Label Text="Gespeelde Datum" FontAttributes="Bold" FontSize="14" Grid.Column="2"/>
                     </Grid>
 
                     <CollectionView Grid.Row="1" ItemsSource="{Binding PersonItems}" Margin="0,5,0,0">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
                                 <Grid ColumnDefinitions="*,*,*,*,*" Padding="5" BackgroundColor="#E0E0E0" Margin="0,0,0,5">
-                                    <Label Text="{Binding ID}" FontSize="14"/>
-                                    <Label Text="{Binding Name}" FontSize="14" Grid.Column="1"/>
-                                    <Label Text="{Binding Score}" FontSize="14" Grid.Column="2"/>
-                                    <Label Text="{Binding Birthday, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14" Grid.Column="3"/>
-                                    <Label Text="{Binding DatePlayed, StringFormat='{0:dd/MM/yyyy HH:mm}'}" FontSize="14" Grid.Column="4"/>
+                                    <!-- <Label Text="{Binding ID}" FontSize="14"/> -->
+                                    <Label Text="{Binding Name}" FontSize="14"/>
+                                    <Label Text="{Binding ScoreFormatted}" FontSize="14" Grid.Column="1" />
+                                    <!-- <Label Text="{Binding Birthday, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14" Grid.Column="3"/> -->
+                                    <Label Text="{Binding DatePlayed, StringFormat='{0:dd/MM/yyyy HH:mm}'}" FontSize="14" Grid.Column="2"/>
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
@@ -72,17 +83,20 @@
 
             <Frame BackgroundColor="#F2F2F2" CornerRadius="10" Padding="10" Margin="0,10,0,0" IsVisible="{Binding IsPersonTableVisible}">
                 <Grid RowDefinitions="Auto,*">
-                    <Grid ColumnDefinitions="*,*" Padding="5">
+                    <Grid ColumnDefinitions="*,*,*,*" Padding="5">
                         <Label Text="Naam" FontAttributes="Bold" FontSize="14"/>
-                        <Label Text="Geboortedatum" FontAttributes="Bold" FontSize="14" Grid.Column="1"/>
+                        <Label Text="Email" FontAttributes="Bold" FontSize="14" Grid.Column="1"/>
+                        <Label Text="Geboortedatum" FontAttributes="Bold" FontSize="14" Grid.Column="2"/>
+                        <Label Text="Type" FontAttributes="Bold" FontSize="14" Grid.Column="3"/>
                     </Grid>
 
                     <CollectionView Grid.Row="1" ItemsSource="{Binding PersonItems}" Margin="0,5,0,0">
                         <CollectionView.ItemTemplate>
                             <DataTemplate>
-                                <Grid ColumnDefinitions="*,*" Padding="5" BackgroundColor="#E0E0E0" Margin="0,0,0,5">
+                                <Grid ColumnDefinitions="*,*,*,*" Padding="5" BackgroundColor="#E0E0E0" Margin="0,0,0,5">
                                     <Label Text="{Binding Name}" FontSize="14"/>
-                                    <Label Text="{Binding Birthday, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14" Grid.Column="1"/>
+                                    <!-- <Label Text="{Binding Email}" FontSize="14" Grid.Column="1" /> -->
+                                    <!-- <Label Text="{Binding Birthday, StringFormat='{0:dd/MM/yyyy}'}" FontSize="14" Grid.Column="2" /> -->
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>

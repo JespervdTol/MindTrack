@@ -12,7 +12,7 @@ namespace MindTrack.Module
 
         public DatabaseService()
         {
-            _connectionString = "Server=localhost;Database=mindtrack;User ID=root;Password=jtol123;Port=3306;";
+            _connectionString = "Server=192.168.153.146;Database=mindtrack;User ID=admin;Password=B9J6-vw#fk%qHkrAB9*j;Port=3306;";
         }
 
         public async Task<List<Person>> GetPersonDataByGameAsync(string game)
@@ -63,7 +63,7 @@ namespace MindTrack.Module
             {
                 await connection.OpenAsync();
 
-                string query = "SELECT id, name, birthday FROM person";
+                string query = "SELECT id, name FROM person";
 
                 using (var command = new MySqlCommand(query, connection))
                 {
@@ -75,7 +75,7 @@ namespace MindTrack.Module
                             {
                                 ID = reader.GetInt32("id"),
                                 Name = reader.GetString("name"),
-                                Birthday = reader.GetDateTime("birthday"),
+                                //Birthday = reader.GetDateTime("birthday"),
                             };
 
                             personItems.Add(person);
@@ -87,7 +87,7 @@ namespace MindTrack.Module
             return personItems;
         }
 
-        public async Task<bool> AddPersonService(string name, string email, DateTime birthday)
+        public async Task<bool> AddPersonService(string name)
         {
             try
             {
@@ -95,12 +95,10 @@ namespace MindTrack.Module
                 {
                     await connection.OpenAsync();
 
-                    string query = "INSERT INTO person (name, email, birthday) VALUES (@name, @email, @birthday)";
+                    string query = "INSERT INTO person (name) VALUES (@name)";
                     using (var command = new MySqlCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@name", name);
-                        command.Parameters.AddWithValue("@email", email);
-                        command.Parameters.AddWithValue("@birthday", birthday);
 
                         int rowsAffected = await command.ExecuteNonQueryAsync();
                         return rowsAffected > 0;
@@ -109,7 +107,8 @@ namespace MindTrack.Module
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error inserting person into database: {ex.Message}");
+                // Log any errors that occur during insertion
+                Console.WriteLine($"Error inserting person: {ex.Message}");
                 return false;
             }
         }
@@ -136,6 +135,65 @@ namespace MindTrack.Module
             }
 
             return gameList;
+        }
+
+        // Validate login credentials
+        public async Task<Account> ValidateLoginAsync(string username, string password)
+        {
+            using (var connection = new MySqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                string query = "SELECT id, username FROM account WHERE username = @username AND password = @password";
+
+                using (var command = new MySqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@username", username);
+                    command.Parameters.AddWithValue("@password", password);
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        if (await reader.ReadAsync())
+                        {
+                            return new Account
+                            {
+                                ID = reader.GetInt32("id"),
+                                Username = reader.GetString("username"),
+                                Password = null // Do not return the password
+                            };
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        // Add a new account
+        public async Task<bool> AddAccountAsync(string username, string password)
+        {
+            try
+            {
+                using (var connection = new MySqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    string query = "INSERT INTO account (username, password) VALUES (@username, @password)";
+                    using (var command = new MySqlCommand(query, connection))
+                    {
+                        command.Parameters.AddWithValue("@username", username);
+                        command.Parameters.AddWithValue("@password", password);
+
+                        int rowsAffected = await command.ExecuteNonQueryAsync();
+                        return rowsAffected > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error adding account to database: {ex.Message}");
+                return false;
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
--- DROP DATABASE mindtrack;
+ -- DROP DATABASE mindtrack;
 CREATE DATABASE IF NOT EXISTS mindtrack;
 USE mindtrack;
 
@@ -52,22 +52,22 @@ INSERT INTO person (account_id, name, email, birthday) VALUES
 (5, 'Jesper van der Tol', 'j.vandertol@student.fontys.nl', '1930-09-30');
 
 INSERT INTO game (name) VALUES
-('Memory'),
-('ReactionSpeed');
+('Reaction Test'),
+('Simon');
 
 INSERT INTO score (person_id, game_id, game_score, date_played) VALUES
-(1, 1, 28, '2024-11-03 14:20:00'), -- Pieter Naucke plays Memory
-(1, 2, 220, '2024-11-04 16:10:00'), -- Pieter Naucke plays ReactionSpeed
-(2, 1, 19, '2024-11-03 11:30:00'), -- Juan Manuel Hol plays Memory
-(2, 2, 180, '2024-11-03 12:45:00'), -- Juan Manuel Hol plays ReactionSpeed
-(3, 1, 24, '2024-11-04 09:50:00'), -- Puteri Basri plays Memory
-(3, 2, 270, '2024-11-05 13:15:00'), -- Puteri Basri plays ReactionSpeed
-(4, 1, 30, '2024-11-03 10:00:00'), -- Wassila Boulayoune plays Memory
-(4, 2, 190, '2024-11-03 11:30:00'), -- Wassila Boulayoune plays ReactionSpeed
-(5, 1, 22, '2024-11-04 15:00:00'), -- Jesper van der Tol plays Memory
-(5, 2, 210, '2024-11-05 17:20:00'), -- Jesper van der Tol plays ReactionSpeed
-(1, 1, 25, '2024-11-05 14:35:00'), -- Pieter Naucke plays Memory again
-(2, 2, 185, '2024-11-05 16:40:00'), -- Juan Manuel Hol plays ReactionSpeed again
-(4, 1, 29, '2024-11-06 09:30:00'), -- Wassila Boulayoune plays Memory again
-(5, 2, 215, '2024-11-06 12:15:00'); -- Jesper van der Tol plays ReactionSpeed again
+(1, 2, 28, '2024-11-03 14:20:00'), -- Pieter Naucke plays Memory
+(1, 1, 220, '2024-11-04 16:10:00'), -- Pieter Naucke plays ReactionSpeed
+(2, 2, 19, '2024-11-03 11:30:00'), -- Juan Manuel Hol plays Memory
+(2, 1, 180, '2024-11-03 12:45:00'), -- Juan Manuel Hol plays ReactionSpeed
+(3, 2, 24, '2024-11-04 09:50:00'), -- Puteri Basri plays Memory
+(3, 1, 270, '2024-11-05 13:15:00'), -- Puteri Basri plays ReactionSpeed
+(4, 2, 30, '2024-11-03 10:00:00'), -- Wassila Boulayoune plays Memory
+(4, 1, 190, '2024-11-03 11:30:00'), -- Wassila Boulayoune plays ReactionSpeed
+(5, 2, 22, '2024-11-04 15:00:00'), -- Jesper van der Tol plays Memory
+(5, 1, 210, '2024-11-05 17:20:00'), -- Jesper van der Tol plays ReactionSpeed
+(1, 2, 25, '2024-11-05 14:35:00'), -- Pieter Naucke plays Memory again
+(2, 1, 185, '2024-11-05 16:40:00'), -- Juan Manuel Hol plays ReactionSpeed again
+(4, 2, 29, '2024-11-06 09:30:00'), -- Wassila Boulayoune plays Memory again
+(5, 1, 215, '2024-11-06 12:15:00'); -- Jesper van der Tol plays ReactionSpeed again
 
